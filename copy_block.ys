@@ -1,0 +1,48 @@
+# Execution begins at address 0
+	.pos 0
+	irmovq stack, %rsp
+	call main
+	halt
+
+	.align 8
+# src
+src:
+	.quad 0x00a
+	.quad 0x0b0
+	.quad 0xc00
+# dest
+dest:
+	.quad 0x111
+	.quad 0x222
+	.quad 0x333	
+main:
+	irmovq src,%rdi
+	irmovq dest,%rsi
+	irmovq $3,%rbx
+	call copy_block
+	ret
+copy_block:
+	pushq %r12
+	pushq %r13
+	pushq %r14
+	irmovq $0,%rax
+	irmovq $1,%r13
+	irmovq $8,%r14
+loop:
+	mrmovq 0(%rdi),%r12
+	addq %r14,%rdi
+	rmmovq %r12,(%rsi)
+	addq %r14,%rsi
+	xorq %r12,%rax
+	subq %r13,%rbx
+test:
+	andq %rbx,%rbx
+	jne loop
+	popq %r14
+	popq %r13
+	popq %r12
+	ret
+
+# Stack starts here and grows to lower addresses
+	.pos 0x100
+stack:
